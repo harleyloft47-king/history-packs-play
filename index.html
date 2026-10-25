@@ -3,11 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- v1.8.4 phones: dark page (stops Samsung Internet's dark mode from re-colouring the game), toolbar colour, home-screen title. -->
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#1a2020" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="History Packs" />
+    <meta name="format-detection" content="telephone=no" />
     <title>History Packs</title>
     <link rel="preload" as="image" href="pack-bg.webp" />
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body {
+        color-scheme: dark;
+        /* No long-press text selection / callout menu or double-tap zoom while tearing packs (iPhone, Android). */
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
         width: 100%;
         height: 100%;
         background: #1a2020;
@@ -30,6 +47,7 @@
       /* Pass D — auth overlay (DESIGN.md v2.0) */
       .rg-auth-root {
         position: fixed;
+        top: 0; right: 0; bottom: 0; left: 0;
         inset: 0;
         z-index: 9999;
         pointer-events: none;
@@ -39,6 +57,7 @@
       }
       .rg-auth-backdrop {
         position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
         inset: 0;
         background: rgba(12, 16, 16, 0.72);
         display: flex;
@@ -302,6 +321,7 @@
          the page opens until the game is ready. */
       #rg-loading {
         position: fixed;
+        top: 0; right: 0; bottom: 0; left: 0;
         inset: 0;
         z-index: 9000;
         background: #0b0712;
@@ -314,6 +334,7 @@
       #rg-loading.rg-done { opacity: 0; pointer-events: none; }
       #rg-loading .rg-load-bg {
         position: absolute;
+        top: -40px; right: -40px; bottom: -40px; left: -40px;
         inset: -40px;
         background: url(loading.webp) center / cover no-repeat;
         filter: blur(28px) brightness(0.45);
@@ -359,6 +380,16 @@
       @keyframes rg-load { from { left: -40%; } to { left: 100%; } }
       @media (prefers-reduced-motion: reduce) { #rg-loading .rg-load-bar i { animation: none; left: 30%; } }
 
+          /* v1.8.4: text boxes stay typeable (Safari needs user-select on inputs), and 16px stops
+         iPhone Safari zooming the page when a box is tapped. */
+      input, textarea, select, .rg-auth-input {
+        -webkit-user-select: text;
+        user-select: text;
+        -webkit-touch-callout: default;
+      }
+      @media (pointer: coarse) {
+        input, textarea, select, .rg-auth-input { font-size: 16px; }
+      }
     </style>
   </head>
   <body>
