@@ -351,46 +351,56 @@
         background: url(loading.webp) center / cover no-repeat;
         filter: blur(28px) brightness(0.45);
       }
-      #rg-loading img {
+      /* v2.9 (Harley 2026-11-18): his new loading picture. The painted bar is emptied in the picture;
+         a live red fill (loading-fill.webp, stretched) and the percentage sit exactly over it. All
+         positions are fractions of the 1672×941 picture, so they line up at any size. */
+      #rg-loading .rg-load-frame {
         position: relative;
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
+        width: min(100vw, calc(100vh * 1672 / 941));
+        width: min(100vw, calc(100dvh * 1672 / 941));
+        aspect-ratio: 1672 / 941;
+        container-type: inline-size;
         box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
       }
-      #rg-loading .rg-load-bar {
+      /* Upright phones: zoom in so the picture isn't a thin strip; the sides are trimmed but the
+         logo and the bar (25.8%–74.2% across) stay in view. */
+      @media (orientation: portrait) {
+        #rg-loading .rg-load-frame { width: 140vw; flex: 0 0 auto; }
+      }
+      #rg-loading .rg-load-frame img {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      #rg-loading .rg-load-track {
         position: absolute;
-        left: 50%;
-        bottom: max(28px, 5vh);
-        width: min(260px, 60vw);
-        height: 6px;
-        transform: translateX(-50%);
-        border-radius: 3px;
-        background: rgba(0, 0, 0, 0.55);
-        box-shadow: 0 0 0 1px rgba(255, 207, 77, 0.35);
+        left: 25.837%;
+        top: 88.416%;
+        width: 41.806%;
+        height: 4.463%;
         overflow: hidden;
+        border-radius: 2px 40% 40% 2px / 2px 50% 50% 2px;
       }
-      #rg-loading .rg-load-bar i {
+      #rg-loading .rg-load-fill {
+        width: 0%;
+        height: 100%;
+        background: url(loading-fill.webp) 0 0 / 100% 100% no-repeat;
+      }
+      #rg-loading .rg-load-pct {
         position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 40%;
-        background: linear-gradient(90deg, transparent, #ffcf4d, #fff4c2, #ffcf4d, transparent);
-        animation: rg-load 1.3s ease-in-out infinite;
+        left: 67.82%;
+        top: 88.416%;
+        width: 6.34%;
+        height: 4.463%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 700 1.9vw/1 Georgia, 'Times New Roman', serif;
+        font-size: 2.15cqw;
+        color: #f4efe6;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+        letter-spacing: 0.02em;
       }
-      #rg-loading .rg-load-txt {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: calc(max(28px, 5vh) + 14px);
-        text-align: center;
-        font: 600 13px/1 Georgia, serif;
-        letter-spacing: 0.08em;
-        color: #ffe3a1;
-        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
-      }
-      @keyframes rg-load { from { left: -40%; } to { left: 100%; } }
-      @media (prefers-reduced-motion: reduce) { #rg-loading .rg-load-bar i { animation: none; left: 30%; } }
 
           /* v1.8.4: text boxes stay typeable (Safari needs user-select on inputs), and 16px stops
          iPhone Safari zooming the page when a box is tapped. */
@@ -407,21 +417,43 @@
   <body>
     <div id="rg-loading" role="img" aria-label="History Packs is loading">
       <div class="rg-load-bg"></div>
-      <img src="loading.webp" alt="History Packs booster boxes and packs" />
-      <div class="rg-load-txt">Opening the vault…</div>
-      <div class="rg-load-bar"><i></i></div>
+      <div class="rg-load-frame">
+        <img src="loading.webp" alt="History Packs: Loading" />
+        <div class="rg-load-track"><div class="rg-load-fill"></div></div>
+        <div class="rg-load-pct">0%</div>
+      </div>
     </div>
     <script>
       /* The game calls this when it is ready; the picture stays up at least 1.5 s so it can be seen. */
       (function () {
         var t0 = Date.now();
+        /* v2.9 progress bar: the game reports real steps with __rgLoadStep(done, ceiling); between steps
+           the bar creeps slowly toward the ceiling so it never looks stuck, and never passes it. */
+        var shown = 0, target = 0.03, ceiling = 0.35, done = false;
+        var fill = document.querySelector('#rg-loading .rg-load-fill');
+        var pct = document.querySelector('#rg-loading .rg-load-pct');
+        window.__rgLoadStep = function (f, cap) {
+          target = Math.max(target, f);
+          ceiling = Math.max(ceiling, cap || f, target);
+        };
+        function tick() {
+          if (!done && target < ceiling) target = Math.min(ceiling, target + 0.0012);
+          shown += (target - shown) * 0.12;
+          if (target - shown < 0.002) shown = target;
+          if (fill) fill.style.width = (shown * 100).toFixed(2) + '%';
+          if (pct) pct.textContent = Math.round(shown * 100) + '%';
+          if (shown < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
         window.__rgHideLoading = function () {
           var el = document.getElementById('rg-loading');
           if (!el) return;
+          done = true;
+          target = ceiling = 1;
           setTimeout(function () {
             el.classList.add('rg-done');
             setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
-          }, Math.max(0, 1500 - (Date.now() - t0)));
+          }, Math.max(400, 1500 - (Date.now() - t0)));
         };
         /* Never leave the picture up for ever if something goes wrong while loading. */
         setTimeout(function () { window.__rgHideLoading(); }, 30000);
