@@ -13,6 +13,18 @@
     <meta name="format-detection" content="telephone=no" />
     <title>History Packs</title>
     <link rel="preload" as="image" href="pack-bg.webp" />
+    <!-- v2.0 look (Harley 2026-11-17): engraved Roman capitals for logos, packs and buttons.
+         Cinzel (SIL Open Font License, fonts/Cinzel-OFL.txt), served with the game so it works offline. -->
+    <link rel="preload" as="font" type="font/ttf" href="fonts/cinzel.ttf" crossorigin />
+    <style>
+      @font-face {
+        font-family: 'Cinzel';
+        src: url('fonts/cinzel.ttf') format('truetype');
+        font-weight: 400 900;
+        font-style: normal;
+        font-display: swap;
+      }
+    </style>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body {
