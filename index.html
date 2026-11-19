@@ -412,6 +412,10 @@
       @media (pointer: coarse) {
         input, textarea, select, .rg-auth-input { font-size: 16px; }
       }
+      /* Older iPhones (iOS 15) don't know cqw: size the percentage from the screen width instead. */
+      @media (orientation: portrait) {
+        #rg-loading .rg-load-pct { font-size: 2.66vw; font-size: 2.15cqw; }
+      }
     </style>
   </head>
   <body>
