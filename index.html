@@ -6,6 +6,29 @@
     <!-- v1.8.4 phones: dark page (stops Samsung Internet's dark mode from re-colouring the game), toolbar colour, home-screen title. -->
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#1a2020" />
+    <!-- Install as an app (Harley 2026-11-19): icon, name and app window for phones and computers. -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="History Packs" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <script>
+      /* Catch the browser's install offer early so the "Get the app" button can use it later, and start
+         the app helper (sw.js). Not inside other pages (the claude.ai previews): browsers can't install there. */
+      (function () {
+        var inFrame = true;
+        try { inFrame = window.self !== window.top; } catch (e) {}
+        var st = (window.__rgInstall = { evt: null, inFrame: inFrame, installed: false, listeners: [] });
+        function changed() { for (var i = 0; i < st.listeners.length; i++) { try { st.listeners[i](); } catch (e) {} } }
+        window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); st.evt = e; changed(); });
+        window.addEventListener('appinstalled', function () { st.installed = true; st.evt = null; changed(); });
+        if (!inFrame && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+          window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+        }
+      })();
+    </script>
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
