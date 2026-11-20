@@ -439,6 +439,19 @@
       @media (orientation: portrait) {
         #rg-loading .rg-load-pct { font-size: 2.66vw; font-size: 2.15cqw; }
       }
+      /* v3.1.1: upright phones — while the account screen is open, the loading picture moves to the top
+         and the sign-in panel sits underneath it, so both can be seen. */
+      @media (orientation: portrait) {
+        html.rg-gate-open #rg-loading { align-items: flex-start; }
+        html.rg-gate-open #rg-loading .rg-load-frame { margin-top: max(8px, env(safe-area-inset-top)); }
+        html.rg-gate-open #rg-account-gate .rg-auth-backdrop { align-items: flex-end; padding: 12px 12px max(12px, env(safe-area-inset-bottom)); overflow-y: auto; }
+        html.rg-gate-open #rg-account-gate .rg-auth-panel { padding-top: 14px; padding-bottom: 14px; }
+        html.rg-gate-open #rg-account-gate .rg-auth-blurb { font-size: 13px; margin-bottom: 6px; }
+      }
+      @media (orientation: portrait) and (max-height: 740px) {
+        html.rg-gate-open #rg-account-gate .rg-auth-blurb { display: none; }
+        html.rg-gate-open #rg-account-gate .rg-auth-panel > p:last-child { display: none; }
+      }
     </style>
   </head>
   <body>
@@ -482,8 +495,14 @@
             setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
           }, Math.max(400, 1500 - (Date.now() - t0)));
         };
-        /* Never leave the picture up for ever if something goes wrong while loading. */
-        setTimeout(function () { window.__rgHideLoading(); }, 30000);
+        /* Never leave the picture up for ever if something goes wrong while loading. v3.1.1: but keep it
+           while the account screen is open (typing a name, email and password can take a while). */
+        (function failsafe() {
+          setTimeout(function () {
+            if (document.getElementById('rg-account-gate')) failsafe();
+            else window.__rgHideLoading();
+          }, 30000);
+        })();
       })();
     </script>
     <div id="app">

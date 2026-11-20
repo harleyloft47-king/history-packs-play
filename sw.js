@@ -1,7 +1,7 @@
 /* History Packs app helper (Harley 2026-11-19). Lets browsers install the game as an app and keeps a
    copy of what was loaded so the app still opens without internet. Always asks the network first, so
    updates show straight away; the saved copy is only used when offline. */
-const CACHE = 'history-packs-3.1.0';
+const CACHE = 'history-packs-3.1.1';
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './manifest.webmanifest', './icons/icon-192.png'])).catch(() => undefined));
